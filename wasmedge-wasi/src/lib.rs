@@ -12,11 +12,11 @@ use wasmedge_wasi_common::{
     string_array::StringArrayError,
 };
 
-pub struct WasiCtxBuilder(WasiEnviron);
+pub struct WasiEnvironBuilder(WasiEnviron);
 
-impl WasiCtxBuilder {
+impl WasiEnvironBuilder {
     pub fn new() -> Self {
-        WasiCtxBuilder(WasiEnviron::new())
+        WasiEnvironBuilder(WasiEnviron::new())
     }
     pub fn env(mut self, var: &str, value: &str) -> Result<Self, StringArrayError> {
         self.0.push_env(var, value)?;
