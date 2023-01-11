@@ -1,14 +1,10 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+pub mod clocks;
+pub mod dir;
+pub mod environ;
+pub mod error;
+pub mod file;
+pub mod pipe;
+pub mod string_array;
+pub mod table;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use error::{Context, Error, ErrorExt, ErrorKind};
