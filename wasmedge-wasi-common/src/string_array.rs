@@ -1,17 +1,7 @@
+#[derive(Debug, Clone)]
 pub struct StringArray {
     elems: Vec<String>,
 }
-
-#[derive(Debug, thiserror::Error)]
-pub enum StringArrayError {
-    #[error("Number of elements exceeds 2^32")]
-    NumberElements,
-    #[error("Element size exceeds 2^32")]
-    ElementSize,
-    #[error("Cumulative size exceeds 2^32")]
-    CumulativeSize,
-}
-
 impl StringArray {
     pub fn new() -> Self {
         StringArray { elems: Vec::new() }
@@ -41,4 +31,14 @@ impl StringArray {
             .map(|e| e.as_bytes().len() + 1)
             .sum::<usize>() as u32
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum StringArrayError {
+    #[error("Number of elements exceeds 2^32")]
+    NumberElements,
+    #[error("Element size exceeds 2^32")]
+    ElementSize,
+    #[error("Cumulative size exceeds 2^32")]
+    CumulativeSize,
 }

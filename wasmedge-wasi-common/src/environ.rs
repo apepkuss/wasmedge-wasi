@@ -3,19 +3,27 @@ use crate::error::Error;
 use crate::file::{FileCaps, FileEntry, WasiFile};
 use crate::string_array::{StringArray, StringArrayError};
 use crate::table::Table;
-use std::path::{Path, PathBuf};
+use crate::WasiSnapshotPreview1;
+use std::{
+    io::Write,
+    path::{Path, PathBuf},
+};
 
 pub struct WasiEnviron {
     pub args: StringArray,
+    pub args_vec: Vec<String>,
     pub env: StringArray,
     pub table: Table,
+    pub exit_code: i32,
 }
 impl WasiEnviron {
     pub fn new() -> Self {
         let mut environ = WasiEnviron {
             args: StringArray::new(),
+            args_vec: Vec::new(),
             env: StringArray::new(),
             table: Table::new(),
+            exit_code: 0,
         };
 
         environ.set_stdin(Box::new(crate::pipe::ReadPipe::new(std::io::empty())));
@@ -30,8 +38,7 @@ impl WasiEnviron {
     }
 
     pub fn push_env(&mut self, var: &str, value: &str) -> Result<(), StringArrayError> {
-        self.env.push(format!("{}={}", var, value))?;
-        Ok(())
+        self.env.push(format!("{}={}", var, value))
     }
 
     pub fn push_preopened_dir(
@@ -114,5 +121,40 @@ impl WasiEnviron {
     ) -> Result<u32, Error> {
         self.table()
             .push(Box::new(DirEntry::new(caps, file_caps, Some(path), dir)))
+    }
+}
+impl WasiSnapshotPreview1 for WasiEnviron {
+    fn proc_exit(&mut self, code: i32) {
+        println!("code: {}", code);
+        self.exit_code = code;
+        println!("exit_code: {}", self.exit_code);
+    }
+
+    fn args_sizes_get(&self) -> (i32, i32) {
+        println!("in WasiEnviron::args_sizes_get");
+        (
+            self.args.number_elements() as i32,
+            self.args.cumulative_size() as i32,
+        )
+    }
+
+    fn environ_sizes_get(&self) -> (i32, i32) {
+        println!("in WasiEnviron::environ_sizes_get");
+        (
+            self.env.number_elements() as i32,
+            self.env.cumulative_size() as i32,
+        )
+    }
+
+    fn fd_write(&mut self, fd: i32, iovs: &[std::io::IoSlice]) -> i32 {
+        println!("in WasiEnviron::fd_write");
+
+        // let buffer: &mut File = wasi_environ.table.get_mut(fd as u32).expect("fd not found");
+        let mut buffer = std::fs::File::create("foo.txt").expect("failed to create file");
+        let nwritten = buffer
+            .write_vectored(iovs)
+            .expect("failed to write to file");
+
+        nwritten as i32
     }
 }
