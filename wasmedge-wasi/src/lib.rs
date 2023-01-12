@@ -5,12 +5,8 @@ pub mod stdio;
 
 use crate::net::Socket;
 use std::path::Path;
-use wasmedge_wasi_common::{
-    environ::WasiEnviron,
-    error::Error,
-    file::{FileCaps, WasiFile},
-    string_array::StringArrayError,
-};
+pub use wasmedge_wasi_common::{environ::WasiEnviron, file::WasiFile};
+use wasmedge_wasi_common::{error::Error, file::FileCaps, string_array::StringArrayError};
 
 pub struct WasiEnvironBuilder(WasiEnviron);
 
