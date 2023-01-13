@@ -31,6 +31,10 @@ impl StringArray {
             .map(|e| e.as_bytes().len() + 1)
             .sum::<usize>() as u32
     }
+
+    pub fn elements(&self) -> Vec<&str> {
+        self.elems.iter().map(|e| e.as_str()).collect::<Vec<&str>>()
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
