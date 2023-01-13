@@ -149,6 +149,16 @@ impl WasiSnapshotPreview1 for WasiEnviron {
         )
     }
 
+    fn environ_get(&self, out: &mut Vec<Ciovec>) {
+        for env in self.env.elements() {
+            let iov = Ciovec {
+                buf: env.as_ptr(),
+                buf_len: env.as_bytes().len(),
+            };
+            out.push(iov);
+        }
+    }
+
     fn fd_write(&mut self, fd: i32, iovs: &[std::io::IoSlice]) -> i32 {
         println!("in WasiEnviron::fd_write");
 

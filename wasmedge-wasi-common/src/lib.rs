@@ -21,6 +21,11 @@ pub trait WasiSnapshotPreview1 {
     /// Return the number of environment variable pairs and the total size of the environment variable data.
     fn environ_sizes_get(&self) -> (i32, i32);
 
+    /// Read environment variable data.
+    /// The sizes of the buffers should match that returned by `environ_sizes_get`.
+    /// Key/value pairs are expected to be joined with `=`s, and terminated with `\0`s.
+    fn environ_get(&self, out: &mut Vec<Ciovec>);
+
     /// Write data described by `iovs` to the file associated with the file descriptor `fd`.
     ///
     /// Return the number of bytes written.
