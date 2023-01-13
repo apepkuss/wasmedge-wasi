@@ -9,7 +9,6 @@ pub use wasmedge_wasi_common::{environ::WasiEnviron, file::WasiFile};
 use wasmedge_wasi_common::{error::Error, file::FileCaps, string_array::StringArrayError};
 
 pub struct WasiEnvironBuilder(WasiEnviron);
-
 impl WasiEnvironBuilder {
     pub fn new() -> Self {
         WasiEnvironBuilder(WasiEnviron::new())
