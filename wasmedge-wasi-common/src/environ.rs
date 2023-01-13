@@ -11,7 +11,6 @@ use std::{
 
 pub struct WasiEnviron {
     pub args: StringArray,
-    pub args_vec: Vec<String>,
     pub env: StringArray,
     pub table: Table,
     pub exit_code: i32,
@@ -20,7 +19,6 @@ impl WasiEnviron {
     pub fn new() -> Self {
         let mut environ = WasiEnviron {
             args: StringArray::new(),
-            args_vec: Vec::new(),
             env: StringArray::new(),
             table: Table::new(),
             exit_code: 0,
@@ -124,12 +122,6 @@ impl WasiEnviron {
     }
 }
 impl WasiSnapshotPreview1 for WasiEnviron {
-    fn proc_exit(&mut self, code: i32) {
-        println!("code: {}", code);
-        self.exit_code = code;
-        println!("exit_code: {}", self.exit_code);
-    }
-
     fn args_sizes_get(&self) -> (i32, i32) {
         println!("in WasiEnviron::args_sizes_get");
         (
@@ -156,5 +148,11 @@ impl WasiSnapshotPreview1 for WasiEnviron {
             .expect("failed to write to file");
 
         nwritten as i32
+    }
+
+    fn proc_exit(&mut self, code: i32) {
+        println!("code: {}", code);
+        self.exit_code = code;
+        println!("exit_code: {}", self.exit_code);
     }
 }
