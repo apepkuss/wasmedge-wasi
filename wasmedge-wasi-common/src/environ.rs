@@ -3,6 +3,7 @@ use crate::error::Error;
 use crate::file::{FileCaps, FileEntry, WasiFile};
 use crate::string_array::{StringArray, StringArrayError};
 use crate::table::Table;
+use crate::Ciovec;
 use crate::WasiSnapshotPreview1;
 use std::{
     io::Write,
@@ -128,6 +129,16 @@ impl WasiSnapshotPreview1 for WasiEnviron {
             self.args.number_elements() as i32,
             self.args.cumulative_size() as i32,
         )
+    }
+
+    fn args_get(&self, out: &mut Vec<Ciovec>) {
+        for arg in self.args.elements() {
+            let iov = Ciovec {
+                buf: arg.as_ptr(),
+                buf_len: arg.as_bytes().len(),
+            };
+            out.push(iov);
+        }
     }
 
     fn environ_sizes_get(&self) -> (i32, i32) {
