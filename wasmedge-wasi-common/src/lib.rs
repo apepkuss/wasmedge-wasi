@@ -29,7 +29,7 @@ pub trait WasiSnapshotPreview1 {
     /// Write data described by `iovs` to the file associated with the file descriptor `fd`.
     ///
     /// Return the number of bytes written.
-    fn fd_write(&mut self, fd: i32, iovs: &[std::io::IoSlice]) -> i32;
+    fn fd_write(&mut self, fd: i32, iovs: CiovecArray) -> i32;
 
     /// Terminate the process normally. An exit code of 0 indicates successful
     /// termination of the program. The meanings of other values is dependent on

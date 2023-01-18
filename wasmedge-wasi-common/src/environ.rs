@@ -3,8 +3,8 @@ use crate::error::Error;
 use crate::file::{FileCaps, FileEntry, WasiFile};
 use crate::string_array::{StringArray, StringArrayError};
 use crate::table::Table;
-use crate::Ciovec;
 use crate::WasiSnapshotPreview1;
+use crate::{Ciovec, CiovecArray};
 use std::{
     io::Write,
     path::{Path, PathBuf},
@@ -132,6 +132,7 @@ impl WasiSnapshotPreview1 for WasiEnviron {
     }
 
     fn args_get(&self, out: &mut Vec<Ciovec>) {
+        println!("in WasiEnviron::args_get");
         for arg in self.args.elements() {
             let iov = Ciovec {
                 buf: arg.as_ptr(),
@@ -150,6 +151,7 @@ impl WasiSnapshotPreview1 for WasiEnviron {
     }
 
     fn environ_get(&self, out: &mut Vec<Ciovec>) {
+        println!("in WasiEnviron::environ_get");
         for env in self.env.elements() {
             let iov = Ciovec {
                 buf: env.as_ptr(),
@@ -159,19 +161,27 @@ impl WasiSnapshotPreview1 for WasiEnviron {
         }
     }
 
-    fn fd_write(&mut self, fd: i32, iovs: &[std::io::IoSlice]) -> i32 {
+    fn fd_write(&mut self, fd: i32, iovs: CiovecArray) -> i32 {
         println!("in WasiEnviron::fd_write");
 
-        // let buffer: &mut File = wasi_environ.table.get_mut(fd as u32).expect("fd not found");
+        let mut io_slice_vec = vec![];
+        for iov in iovs {
+            let buf: &[u8] = unsafe { std::slice::from_raw_parts(iov.buf, iov.buf_len) };
+            let io_slice = std::io::IoSlice::new(buf);
+            io_slice_vec.push(io_slice);
+        }
+
         let mut buffer = std::fs::File::create("foo.txt").expect("failed to create file");
         let nwritten = buffer
-            .write_vectored(iovs)
+            .write_vectored(&io_slice_vec)
             .expect("failed to write to file");
 
         nwritten as i32
     }
 
     fn proc_exit(&mut self, code: i32) {
+        println!("in WasiEnviron::proc_exit");
+
         println!("code: {}", code);
         self.exit_code = code;
         println!("exit_code: {}", self.exit_code);
