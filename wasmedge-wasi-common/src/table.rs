@@ -88,4 +88,8 @@ impl Table {
     pub fn delete(&mut self, key: u32) -> Option<Box<dyn Any + Send + Sync>> {
         self.map.remove(&key)
     }
+
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
 }
