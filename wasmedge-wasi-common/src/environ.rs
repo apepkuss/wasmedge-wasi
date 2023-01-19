@@ -1,6 +1,6 @@
 use crate::dir::{DirCaps, DirEntry, WasiDir};
 use crate::error::Error;
-use crate::file::{FileCaps, FileEntry, WasiFile};
+use crate::file::{FileCaps, FileEntry, FileEntryExt, TableFileExt, WasiFile};
 use crate::string_array::{StringArray, StringArrayError};
 use crate::table::Table;
 use crate::WasiSnapshotPreview1;
@@ -171,12 +171,26 @@ impl WasiSnapshotPreview1 for WasiEnviron {
             io_slice_vec.push(io_slice);
         }
 
-        let mut buffer = std::fs::File::create("foo.txt").expect("failed to create file");
-        let nwritten = buffer
-            .write_vectored(&io_slice_vec)
-            .expect("failed to write to file");
+        let f = self
+            .table()
+            .get_file_mut(fd as u32)
+            .expect("[fd_write] failed to get file")
+            .get_cap_mut(FileCaps::WRITE)
+            .expect("[fd_write] failed to get file cap");
 
-        nwritten as i32
+        // * for test
+        // let mut f = std::fs::File::create("foo.txt").expect("failed to create file");
+
+        let n_written_bytes = f
+            .write_vectored(&io_slice_vec)
+            .expect("[fd_write] failed to write to file");
+
+        // let mut buffer = std::fs::File::create("foo.txt").expect("failed to create file");
+        // let nwritten = buffer
+        //     .write_vectored(&io_slice_vec)
+        //     .expect("failed to write to file");
+
+        i32::try_from(n_written_bytes).expect("[fd_write] failed to convert to i32")
     }
 
     fn proc_exit(&mut self, code: i32) {
